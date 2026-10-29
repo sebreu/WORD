@@ -2,5 +2,5 @@
 // signed, non-editable result links. Example:
 // apiBaseUrl: 'https://dein-tipptest-api.DEIN-NAME.workers.dev'
 window.TYPING_CONFIG = {
-  apiBaseUrl: ''
+  apiBaseUrl: 'https://word.samuel-breu-a2f.workers.dev'
 };
