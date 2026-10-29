@@ -17,7 +17,8 @@ const ui = {
 const state = {
   phase: 'ready', target: '', typed: '', charNodes: [], wordElements: [],
   previousLength: 0, activeWord: -1, deadline: null, interval: null,
-  startToken: null, shareUrl: null, generation: 0, preparedAt: null
+  startToken: null, shareUrl: null, generation: 0, preparedAt: null,
+  lastScrollRow: null
 };
 
 const formatNumber = (number) => new Intl.NumberFormat('de-DE', {
@@ -79,6 +80,39 @@ function buildWordDisplay(text) {
   list.append(fragment);
   ui.wordViewport.append(list);
   ui.wordViewport.scrollTop = 0;
+  state.lastScrollRow = null;
+}
+
+// Keep the current row readable without abrupt jumps or moving the page itself.
+// Scrolling is done only when the user reaches a new text row, not on every character.
+function scrollToActiveWord(word) {
+  const viewport = ui.wordViewport;
+  const rowTop = word.offsetTop; // offsetParent is the positioned words viewport.
+  if (state.lastScrollRow === rowTop) return;
+  state.lastScrollRow = rowTop;
+
+  const visibleTop = viewport.scrollTop;
+  const height = viewport.clientHeight;
+  const margin = Math.min(42, height * 0.24);
+  const wordBottom = rowTop + word.offsetHeight;
+  // Align the scroll position to a whole text row, avoiding clipped letters
+  // at the top edge while keeping two completed rows in view for context.
+  const rowGap = parseFloat(getComputedStyle(word.parentElement).rowGap) || 0;
+  const rowPitch = word.offsetHeight + rowGap;
+  const topPadding = parseFloat(getComputedStyle(viewport).paddingTop) || 0;
+  let destination = null;
+
+  if (wordBottom > visibleTop + height - margin) {
+    destination = Math.max(0, rowTop - topPadding - rowPitch * 2);
+  } else if (rowTop < visibleTop + margin && visibleTop > 0) {
+    // Backspace into earlier rows: bring the active row back into view.
+    destination = Math.max(0, rowTop - topPadding - rowPitch);
+  }
+
+  if (destination !== null && Math.abs(destination - visibleTop) > 3) {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    viewport.scrollTo({ top: destination, behavior: reducedMotion ? 'instant' : 'smooth' });
+  }
 }
 
 function updateFeedback() {
@@ -105,13 +139,7 @@ function updateFeedback() {
     state.wordElements[state.activeWord]?.element.classList.remove('word--active');
     if ((state.phase === 'running' || state.phase === 'armed') && wordIndex >= 0) {
       state.wordElements[wordIndex].element.classList.add('word--active');
-      const word = state.wordElements[wordIndex].element;
-      const viewport = ui.wordViewport;
-      const relativeTop = word.offsetTop - viewport.offsetTop;
-      if (relativeTop < viewport.scrollTop + 8 ||
-          relativeTop + word.offsetHeight > viewport.scrollTop + viewport.clientHeight - 8) {
-        viewport.scrollTop = Math.max(0, relativeTop - 16);
-      }
+      scrollToActiveWord(state.wordElements[wordIndex].element);
     }
     state.activeWord = wordIndex;
   }
@@ -122,8 +150,25 @@ function calculateResult(target, typed) {
   for (let i = 0; i < typed.length; i += 1) {
     if (typed[i] === target[i]) correct += 1;
   }
+
+  // WPM counts only fully correct, completed words (including their spaces).
+  // A word is completed by its following space; the very last challenge word
+  // has no following space and counts only when typed in full.
+  // A mistake anywhere in a completed word excludes that whole word from WPM.
+  let creditedCharacters = 0;
+  let wordStart = 0;
+  for (const word of target.split(' ')) {
+    const completedEnd = Math.min(wordStart + word.length + 1, target.length);
+    if (typed.length >= completedEnd &&
+        typed.slice(wordStart, completedEnd) === target.slice(wordStart, completedEnd)) {
+      creditedCharacters += completedEnd - wordStart;
+    }
+    wordStart = completedEnd;
+    if (wordStart > typed.length) break;
+  }
+
   return {
-    wpm: Math.round(correct * 2) / 10,  // correct characters / 5, for exactly 1 minute
+    wpm: Math.round(creditedCharacters * 2) / 10,  // 5 credited characters = 1 standard word in 60 s
     accuracy: typed.length ? Math.round(correct / typed.length * 1000) / 10 : 0,
     correct,
     errors: typed.length - correct
@@ -160,7 +205,6 @@ function reset() {
   buildWordDisplay(state.target);
   ui.input.value = '';
   ui.input.disabled = true;
-  ui.input.placeholder = 'Tab drücken oder Test vorbereiten wählen …';
   ui.start.disabled = false;
   ui.startLabel.textContent = 'Test vorbereiten';
   ui.reset.textContent = 'Neue Wörter';
@@ -171,7 +215,8 @@ function reset() {
   updateTimer();
 }
 
-// A Tab press (or the button) prepares the challenge and focuses the field.
+// A Tab press (or the button/click on words) prepares the challenge and focuses
+// a visually hidden keyboard capture field; the colored word list is the only feedback.
 // The 60-second clock starts only when the first character is actually entered.
 function arm(target, token) {
   state.phase = 'armed';
@@ -184,13 +229,12 @@ function arm(target, token) {
   updateFeedback();
   ui.input.disabled = false;
   ui.input.value = '';
-  ui.input.placeholder = 'Mit dem ersten Zeichen beginnt die Zeit …';
   ui.timerStatus.textContent = 'Wartet auf Eingabe';
   ui.start.disabled = true;
   ui.startLabel.textContent = 'Bereit';
   ui.reset.textContent = 'Neue Wörter';
   updateTimer();
-  ui.input.focus();
+  ui.input.focus({ preventScroll: true });
 }
 
 function beginRunning() {
@@ -314,7 +358,8 @@ function onInput() {
     void finish();
     return;
   }
-  // Keep one-line input; pasted / dropped text is blocked separately.
+  // The invisible textarea holds the final keystrokes for scoring and Backspace;
+  // pasted / dropped text is blocked separately.
   const cleaned = ui.input.value.replace(/[\r\n\t]/g, ' ').slice(0, state.target.length);
   ui.input.value = cleaned;
   state.typed = cleaned;
@@ -381,6 +426,18 @@ ui.again.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 ui.input.addEventListener('input', onInput);
+ui.input.addEventListener('focus', () => ui.wordViewport.classList.add('words-viewport--focused'));
+ui.input.addEventListener('blur', () => ui.wordViewport.classList.remove('words-viewport--focused'));
+// The visible word area doubles as the click-to-focus target.
+ui.wordViewport.addEventListener('pointerdown', (event) => {
+  if (state.phase === 'ready') {
+    event.preventDefault();
+    void prepare();
+  } else if (state.phase === 'armed' || state.phase === 'running') {
+    event.preventDefault();
+    ui.input.focus({ preventScroll: true });
+  }
+});
 ui.input.addEventListener('keydown', onKeyDown);
 ui.input.addEventListener('paste', (event) => {
   event.preventDefault();

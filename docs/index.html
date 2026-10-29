@@ -41,15 +41,16 @@
           </div>
           <div class="progress-track" role="progressbar" id="progress" aria-label="Fortschritt des Schreibtests" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0"><div class="progress-fill" id="progressFill"></div></div>
 
-          <div class="words-label-row"><span class="field-caption">WÖRTER</span></div>
-          <div class="words-viewport" id="wordViewport" tabindex="-1" aria-label="Zufällig angeordnete deutsche Wörter"></div>
-
-          <div class="input-title-row">
-            <label for="typingInput" class="field-caption">EINGABE</label>
+          <div class="words-label-row">
+            <span class="field-caption">WÖRTER</span>
             <span class="input-hint">Grün = richtig · Rot = falsch</span>
           </div>
-          <textarea id="typingInput" class="typing-input" rows="2" disabled placeholder="Tab drücken oder Test vorbereiten wählen …" aria-describedby="inputHelp" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></textarea>
-          <p class="helper" id="inputHelp">Wörter in der angezeigten Reihenfolge tippen; mit der Leertaste zum nächsten Wort.</p>
+          <div class="typing-surface">
+            <div class="words-viewport" id="wordViewport" aria-label="Zufällig angeordnete deutsche Wörter. Hier klicken, um den Test vorzubereiten oder weiterzutippen."></div>
+            <!-- Invisible keyboard input. Character feedback is displayed only in the word list. -->
+            <textarea id="typingInput" class="typing-capture" rows="1" disabled tabindex="-1" aria-label="Tippfeld für den Schreibtest" aria-describedby="inputHelp" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+          </div>
+          <p class="visually-hidden" id="inputHelp">Wörter in der angezeigten Reihenfolge tippen; mit der Leertaste zum nächsten Wort. Die Zeichen werden unmittelbar im Wortfeld grün oder rot markiert.</p>
 
           <div class="actions-row">
             <button class="button button-primary" id="startButton" type="button"><span id="startLabel">Test vorbereiten</span></button>
@@ -66,7 +67,7 @@
           </div>
           <h2 id="resultTitle">60 Sekunden</h2>
           <div class="score-grid">
-            <div class="score-tile score-tile-main"><span class="score-label">WÖRTER PRO MINUTE</span><strong id="wpmValue">–</strong><span class="score-detail">5 korrekte Zeichen = 1 Wort</span></div>
+            <div class="score-tile score-tile-main"><span class="score-label">WÖRTER PRO MINUTE</span><strong id="wpmValue">–</strong><span class="score-detail">5 Zeichen = 1 Wort · nur fehlerfreie Wörter</span></div>
             <div class="score-tile"><span class="score-label">GENAUIGKEIT</span><strong id="accuracyValue">–</strong><span class="score-detail">Im finalen Text</span></div>
             <div class="score-tile"><span class="score-label">RICHTIGE ZEICHEN</span><strong id="correctValue">–</strong><span class="score-detail">Inklusive korrekter Leerzeichen</span></div>
             <div class="score-tile"><span class="score-label">FEHLER</span><strong id="errorsValue">–</strong><span class="score-detail">Im finalen Text</span></div>

@@ -46,11 +46,11 @@ button:disabled { cursor: not-allowed; }
 .progress-track { margin-top: 21px; width: 100%; height: 3px; background: #e4e9e5; overflow: hidden; }
 .progress-fill { width: 0; height: 100%; background: var(--accent); }
 
-.words-label-row, .input-title-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.words-label-row { margin: 31px 0 10px; }
-.input-title-row { margin: 24px 0 10px; }
+.words-label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 31px 0 10px; }
 .input-hint { color: var(--muted); font-size: 11px; }
-.words-viewport { height: 190px; position: relative; overflow: auto; overscroll-behavior: contain; padding: 16px 18px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); scrollbar-width: thin; scrollbar-color: #d2dacc transparent; font: 500 20px/1.9 ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: -.035em; }
+.typing-surface { position: relative; }
+.words-viewport { height: 190px; position: relative; overflow: auto; overscroll-behavior: contain; padding: 16px 18px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); scrollbar-width: thin; scrollbar-color: #d2dacc transparent; font: 500 20px/1.9 ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; letter-spacing: -.035em; cursor: text; }
+.words-viewport--focused { border-color: #91b09a; }
 .word-list { display: flex; align-content: flex-start; flex-wrap: wrap; gap: 3px 0; }
 .word { display: inline-flex; white-space: nowrap; }
 .word--active { background: rgba(53, 111, 85, .09); }
@@ -60,11 +60,9 @@ button:disabled { cursor: not-allowed; }
 .char--incorrect { color: #aa3434; background: #fbe2df; }
 .char--current::before { content: ''; position: absolute; top: .2em; bottom: .19em; left: -1px; width: 2px; background: var(--accent); animation: caret-blink 1.1s step-end infinite; }
 @keyframes caret-blink { 50% { opacity: 0; } }
-.typing-input { display: block; width: 100%; height: 76px; resize: none; border: 1px solid var(--line); border-radius: 6px; background: white; color: var(--ink); font: 500 17px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; padding: 13px 16px; }
-.typing-input:focus { outline: 2px solid #c9dacc; outline-offset: 0; border-color: #799c85; }
-.typing-input::placeholder { color: #95a29a; font: 400 13px/1.6 ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-.typing-input:disabled { background: #fbfcfb; opacity: 1; cursor: default; }
-.helper { margin: 9px 0 0; font-size: 11px; color: var(--muted); line-height: 1.6; }
+/* Keep a real focusable textarea for German keyboard input and Backspace, but never show its contents. */
+.typing-capture { position: absolute; top: 2px; left: 2px; width: 1px; height: 1px; padding: 0; border: 0; opacity: 0; overflow: hidden; resize: none; pointer-events: none; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 .actions-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 .button { display: inline-flex; justify-content: center; align-items: center; min-height: 40px; padding: 10px 15px; border-radius: 6px; border: 1px solid transparent; font-size: 12px; font-weight: 630; }
