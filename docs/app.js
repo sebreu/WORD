@@ -83,36 +83,24 @@ function buildWordDisplay(text) {
   state.lastScrollRow = null;
 }
 
-// Keep the current row readable without abrupt jumps or moving the page itself.
-// Scrolling is done only when the user reaches a new text row, not on every character.
+// Move the word display as soon as the active word enters the next line.
+// This keeps the line being typed at the top instead of waiting for it to
+// reach the bottom of the viewport. Smooth scrolling only fires on row changes.
 function scrollToActiveWord(word) {
   const viewport = ui.wordViewport;
-  const rowTop = word.offsetTop; // offsetParent is the positioned words viewport.
+  // The viewport is positioned, so its word children report offsets relative
+  // to it. Padding must be subtracted to align the current line with line 1.
+  const rowTop = word.offsetTop;
   if (state.lastScrollRow === rowTop) return;
   state.lastScrollRow = rowTop;
 
-  const visibleTop = viewport.scrollTop;
-  const height = viewport.clientHeight;
-  const margin = Math.min(42, height * 0.24);
-  const wordBottom = rowTop + word.offsetHeight;
-  // Align the scroll position to a whole text row, avoiding clipped letters
-  // at the top edge while keeping two completed rows in view for context.
-  const rowGap = parseFloat(getComputedStyle(word.parentElement).rowGap) || 0;
-  const rowPitch = word.offsetHeight + rowGap;
   const topPadding = parseFloat(getComputedStyle(viewport).paddingTop) || 0;
-  let destination = null;
-
-  if (wordBottom > visibleTop + height - margin) {
-    destination = Math.max(0, rowTop - topPadding - rowPitch * 2);
-  } else if (rowTop < visibleTop + margin && visibleTop > 0) {
-    // Backspace into earlier rows: bring the active row back into view.
-    destination = Math.max(0, rowTop - topPadding - rowPitch);
-  }
-
-  if (destination !== null && Math.abs(destination - visibleTop) > 3) {
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    viewport.scrollTo({ top: destination, behavior: reducedMotion ? 'instant' : 'smooth' });
-  }
+  const destination = Math.max(0, rowTop - topPadding);
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  viewport.scrollTo({
+    top: destination,
+    behavior: reducedMotion ? 'instant' : 'smooth'
+  });
 }
 
 function updateFeedback() {
