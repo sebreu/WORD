@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f8f7" />
+    <meta name="description" content="Schreibgeschwindigkeit messen: 60 Sekunden, zufällige deutsche Wörter und unmittelbares Zeichenfeedback." />
+    <meta name="referrer" content="no-referrer" />
+    <title>Tippklar – Schreibgeschwindigkeit</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./config.js" defer></script>
+    <script src="./app.js" type="module"></script>
+  </head>
+  <body>
+    <div class="desktop-only-message" role="note">
+      <div class="desktop-only-panel">
+        <h1>Bitte am Computer öffnen.</h1>
+        <p>Dieser Schreibtest ist für Desktop-Browser mit Tastatur vorgesehen.</p>
+      </div>
+    </div>
+
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="./" aria-label="Tippklar – Startseite">tippklar<span class="brand-dot">.</span></a>
+      </header>
+
+      <main>
+        <section class="test-card" aria-labelledby="mainTitle">
+          <div class="test-heading">
+            <h1 id="mainTitle">Schreibgeschwindigkeit</h1>
+            <span class="test-tags">DEUTSCH <span aria-hidden="true">·</span> 60 SEKUNDEN</span>
+          </div>
+
+          <div class="timer-row">
+            <span class="timer-number" id="timer" aria-label="Verbleibende Sekunden">60</span>
+            <div class="timer-info">
+              <span class="timer-unit">SEKUNDEN</span>
+              <span class="timer-status" id="timerStatus">Bereit</span>
+            </div>
+          </div>
+          <div class="progress-track" role="progressbar" id="progress" aria-label="Fortschritt des Schreibtests" aria-valuemin="0" aria-valuemax="60" aria-valuenow="0"><div class="progress-fill" id="progressFill"></div></div>
+
+          <div class="words-label-row"><span class="field-caption">WÖRTER</span></div>
+          <div class="words-viewport" id="wordViewport" tabindex="-1" aria-label="Zufällig angeordnete deutsche Wörter"></div>
+
+          <div class="input-title-row">
+            <label for="typingInput" class="field-caption">EINGABE</label>
+            <span class="input-hint">Grün = richtig · Rot = falsch</span>
+          </div>
+          <textarea id="typingInput" class="typing-input" rows="2" disabled placeholder="Tab drücken oder Test vorbereiten wählen …" aria-describedby="inputHelp" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></textarea>
+          <p class="helper" id="inputHelp">Wörter in der angezeigten Reihenfolge tippen; mit der Leertaste zum nächsten Wort.</p>
+
+          <div class="actions-row">
+            <button class="button button-primary" id="startButton" type="button"><span id="startLabel">Test vorbereiten</span></button>
+            <button class="button button-secondary" id="resetButton" type="button">Neue Wörter</button>
+            <span class="keyboard-hint">Oder <kbd>Tab</kbd> drücken. Zeitstart: erstes Zeichen.</span>
+          </div>
+          <p class="notice" id="notice" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="result-card" id="results" hidden aria-labelledby="resultTitle">
+          <div class="results-top">
+            <span class="small-label">ERGEBNIS</span>
+            <span class="result-check" id="resultCheck">Test beendet</span>
+          </div>
+          <h2 id="resultTitle">60 Sekunden</h2>
+          <div class="score-grid">
+            <div class="score-tile score-tile-main"><span class="score-label">WÖRTER PRO MINUTE</span><strong id="wpmValue">–</strong><span class="score-detail">5 korrekte Zeichen = 1 Wort</span></div>
+            <div class="score-tile"><span class="score-label">GENAUIGKEIT</span><strong id="accuracyValue">–</strong><span class="score-detail">Im finalen Text</span></div>
+            <div class="score-tile"><span class="score-label">RICHTIGE ZEICHEN</span><strong id="correctValue">–</strong><span class="score-detail">Inklusive korrekter Leerzeichen</span></div>
+            <div class="score-tile"><span class="score-label">FEHLER</span><strong id="errorsValue">–</strong><span class="score-detail">Im finalen Text</span></div>
+          </div>
+          <div class="share-panel" id="sharePanel">
+            <div class="share-copy"><h3>Ergebnis teilen</h3><p id="shareStatus">Ein signierter Ergebnislink kann nach dem Test erstellt werden.</p></div>
+            <div class="share-actions">
+              <button class="button button-primary button-share" id="shareButton" type="button" disabled>Ergebnis teilen</button>
+              <button class="button button-secondary button-copy" id="copyButton" type="button" disabled>Link kopieren</button>
+            </div>
+          </div>
+          <div class="results-bottom"><span>Keine gespeicherten persönlichen Bestwerte.</span><button class="text-button" id="againButton" type="button">Erneut testen</button></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

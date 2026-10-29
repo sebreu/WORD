@@ -1,0 +1,13 @@
+name = "tippklar-verification"
+main = "worker.js"
+compatibility_date = "2026-10-29"
+workers_dev = true
+
+# IMPORTANT: Replace YOUR_GITHUB_USERNAME and YOUR_REPOSITORY before deployment.
+# These are ordinary public configuration values, NOT the signing secret.
+[vars]
+ALLOWED_ORIGINS = "https://YOUR_GITHUB_USERNAME.github.io"
+SITE_URL = "https://YOUR_GITHUB_USERNAME.github.io/YOUR_REPOSITORY/"
+
+# SIGNING_SECRET must NEVER appear in this file or in GitHub Pages code.
+# Set it separately with: npx wrangler secret put SIGNING_SECRET
